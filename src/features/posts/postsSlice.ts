@@ -1,7 +1,11 @@
-import { createAsyncThunk, createSlice, nanoid } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, nanoid, createSelector } from "@reduxjs/toolkit";
 import { PostsType} from "../../types/Post";
 import { sub } from "date-fns";
 import axios from "axios";
+
+
+// createing a memoized selector for optimization
+
 
 const baseUrl ='https://jsonplaceholder.typicode.com/posts'
 
@@ -20,6 +24,52 @@ export const addNewPost = createAsyncThunk(
     try{
        const respons = await axios.post(baseUrl, initialPost);
        return respons.data;
+  }catch(err){
+    return err.message;
+  }
+  }
+)
+
+
+
+// creating a memoized selector nfor selecting the posts for the suers only, 
+ // so that any change in states that is not dependent on the user will not trigger a re-render
+
+
+
+ // creating memozided selectior  so that we we add styles we will not re-render all the page  on the ui
+ // cz once  reactionis added to the post it will not trigger a re-render
+
+
+
+
+
+
+
+
+
+ /// PostEXCeptr = React.memo(PostExcert) // this will only re-render the changed post first one where we added reaction
+export const updatePost = createAsyncThunk(
+  "posts/updatePost", async(initialPost) => {
+    const {id} = initialPost;
+    try{
+       const response = await axios.put(`${baseUrl}/${id}`, initialPost);
+       return response.data;
+  }catch(err){
+    return err.message;
+  }
+  }
+)
+
+export const deletePost = createAsyncThunk(
+  "posts/deletePost", async(initialPost) => {
+    const {id} = initialPost;
+    try{
+       const response = await axios.delete(`${baseUrl}/${id}`);
+       if(response?.status === 200){
+        return initialPost;
+       }
+       return `${response?.status}: ${response?.statusText}`;
   }catch(err){
     return err.message;
   }
@@ -115,11 +165,26 @@ const postsSlice = createSlice({
           console.log(action.payload)
           state.posts.push(action.payload)
         })
+        .addCase(updatePost.fulfilled, (state, action) => {
+          if(!action.payload?.id) {
+            console.log("the update could not complete")
+            console.log(action.payload)
+            return;
+          }
+          const  {id} = action.payload;
+          action.payload.date = new Date().toISOString()
+          const posts = state.posts.filter(post => post.id !== id);
+          state.posts = [...posts, action.payload];
+        })
+        
     }
 });
 
-export const { postAdded, reacationAdded } = postsSlice.actions;
 export const selectAllPosts = (state) => state.posts.posts;
 export const getPostStatus = (state) => state.posts.status;
 export const getPostError = (state) => state.posts.error;
+
+export const selectPostById = (state, postId) => state.posts.posts.find((post) => post.id === postId);
+export const { postAdded, reacationAdded } = postsSlice.actions;
+
 export default postsSlice.reducer;

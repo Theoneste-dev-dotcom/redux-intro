@@ -1,0 +1,39 @@
+Memoization of selectors in states management
+
+Normalization of states in redux toolkit
+
+
+use CreateEntity Adapter
+
+
+using the Entity adapter in redux toolkit for optimization in redux 
+
+
+postsAdapter.updsertMany documentation
+
+postsadapter.addOne(kdsnflksd)
+
+
+postsAdapter.updsertOne()
+
+
+delete postsAdapter
+
+
+
+postsadapert.removeOne(state, id)
+
+
+
+selectoris
+
+
+sorting using the adapter
+
+
+exporting selectors using the adapter  
+export const {
+    all, 
+
+    by id,
+} = postAdapter()
